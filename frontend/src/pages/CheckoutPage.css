@@ -1,0 +1,89 @@
+.checkout-page {
+  padding: 2rem;
+  background-color: #f8f8f8;
+}
+
+.checkout-container {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.checkout-form {
+  flex: 2;
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 10px;
+}
+
+.checkout-form h1 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.checkout-steps {
+  margin-bottom: 2rem;
+  color: #777;
+}
+
+.shipping-address,
+.delivery-options,
+.payment-method {
+  margin-bottom: 2rem;
+}
+
+.shipping-address h2,
+.delivery-options h2,
+.payment-method h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #eaeaea;
+  padding-bottom: 0.5rem;
+}
+
+.order-summary {
+  flex: 1;
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 10px;
+}
+
+.order-summary h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #eaeaea;
+  padding-bottom: 0.5rem;
+}
+
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eaeaea;
+}
+
+.discount-code {
+  display: flex;
+  margin-top: 1rem;
+}
+
+.discount-code input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 5px 0 0 5px;
+}
+
+.discount-code button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ccc;
+  background-color: #333;
+  color: #fff;
+  border-radius: 0 5px 5px 0;
+  cursor: pointer;
+}

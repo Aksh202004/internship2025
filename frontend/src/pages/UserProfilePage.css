@@ -1,0 +1,378 @@
+.user-profile-page {
+  padding: 2rem;
+  background-color: #f8f8f8;
+  min-height: 100vh;
+}
+
+.profile-container {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.profile-sidebar {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 10px;
+  height: fit-content;
+  position: sticky;
+  top: 2rem;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.user-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: #fff;
+}
+
+.user-details h4 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.user-details p {
+  margin: 0.5rem 0 0 0;
+  color: #777;
+  font-size: 0.9rem;
+}
+
+.profile-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.profile-nav li {
+  margin-bottom: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.profile-nav li:hover {
+  background-color: #f5f5f5;
+}
+
+.profile-nav li.active {
+  background-color: #ffe5e5;
+  color: #d9534f;
+}
+
+.profile-nav li i {
+  font-size: 1rem;
+  width: 20px;
+}
+
+.profile-nav li span {
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.profile-content {
+  background-color: #fff;
+  padding: 2.5rem;
+  border-radius: 10px;
+}
+
+.profile-content h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.welcome-subtitle {
+  color: #666;
+  margin: 0 0 2rem 0;
+}
+
+.personal-details,
+.password-section,
+.my-wishlist-section {
+  margin-bottom: 3rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #eaeaea;
+}
+
+.personal-details h3,
+.password-section h3,
+.my-wishlist-section h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.edit-btn {
+  padding: 0.5rem 1.25rem;
+  background: #fff;
+  border: 2px solid #d9534f;
+  color: #d9534f;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.edit-btn:hover {
+  background: #d9534f;
+  color: #fff;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.detail-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.detail-field:nth-child(3) {
+  grid-column: 1;
+}
+
+.detail-field label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #666;
+}
+
+.detail-field p {
+  padding: 0.75rem;
+  background: #f5f5f5;
+  border-radius: 5px;
+  margin: 0;
+  color: #333;
+}
+
+.detail-field input {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+.detail-field input:focus {
+  outline: none;
+  border-color: #d9534f;
+}
+
+.password-subtitle {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+}
+
+.change-password-btn {
+  padding: 0.75rem 1.5rem;
+  background: #fff;
+  border: 1px solid #333;
+  color: #333;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.change-password-btn:hover {
+  background: #333;
+  color: #fff;
+}
+
+.empty-wishlist-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+}
+
+.empty-wishlist-message i {
+  font-size: 4rem;
+  color: #ddd;
+  margin-bottom: 1rem;
+}
+
+.empty-wishlist-message p {
+  font-size: 1.2rem;
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.browse-btn {
+  padding: 0.75rem 2rem;
+  background: #d9534f;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.browse-btn:hover {
+  background: #c9302c;
+  transform: translateY(-2px);
+}
+
+.wishlist-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.wishlist-card {
+  background: #fff;
+  border: 1px solid #eaeaea;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+}
+
+.wishlist-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.remove-wishlist-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: #fff;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  font-size: 1.2rem;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.remove-wishlist-btn:hover {
+  background: #ffe5e5;
+  color: #d9534f;
+  transform: scale(1.1);
+}
+
+.wishlist-card-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  padding: 1rem;
+}
+
+.wishlist-card-link:hover h4 {
+  color: #d9534f;
+}
+
+.wishlist-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 5px;
+  margin-bottom: 1rem;
+}
+
+.wishlist-card h4 {
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.3;
+  transition: color 0.2s ease;
+}
+
+.wishlist-price {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.add-to-cart-wishlist-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: #d9534f;
+  color: #fff;
+  border: none;
+  border-top: 1px solid #eaeaea;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.add-to-cart-wishlist-btn:hover {
+  background: #c9302c;
+}
+
+@media (max-width: 968px) {
+  .profile-container {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-sidebar {
+    position: static;
+  }
+
+  .wishlist-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .wishlist-grid {
+    grid-template-columns: 1fr;
+  }
+}

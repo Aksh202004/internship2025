@@ -1,0 +1,197 @@
+.footer {
+  background-color: #f8f8f8;
+  padding: 3rem 2rem;
+  color: #333;
+}
+
+.footer-container {
+  display: flex;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 2rem;
+}
+
+.footer-section {
+  flex: 1;
+  margin: 0;
+}
+
+.footer-section h4 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  color: #832729;
+}
+
+.footer-section p {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #666;
+}
+
+.footer-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-section li {
+  margin-bottom: 0.75rem;
+}
+
+.footer-section a {
+  text-decoration: none;
+  color: #666;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+}
+
+.footer-section a:hover {
+  color: #832729;
+}
+
+.newsletter-signup {
+  display: flex;
+  margin-top: 1rem;
+}
+
+.newsletter-signup input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px 0 0 4px;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.newsletter-signup input:focus {
+  border-color: #832729;
+}
+
+.newsletter-signup button {
+  padding: 0.75rem 1.25rem;
+  border: none;
+  background-color: #832729;
+  color: #fff;
+  border-radius: 0 4px 4px 0;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.newsletter-signup button:hover {
+  background-color: #6b1f21;
+}
+
+.footer-bottom {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #ddd;
+}
+
+.footer-bottom p {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 0;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .footer {
+    padding: 2rem 1rem;
+  }
+
+  .footer-container {
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .footer-section {
+    margin: 0;
+  }
+
+  .footer-section h4 {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .footer-section p {
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  .footer-section li {
+    margin-bottom: 0.6rem;
+  }
+
+  .footer-section a {
+    font-size: 0.85rem;
+  }
+
+  .newsletter-signup input {
+    padding: 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  .newsletter-signup button {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .footer-bottom {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+  }
+
+  .footer-bottom p {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer {
+    padding: 1.5rem 1rem;
+  }
+
+  .footer-container {
+    gap: 1.5rem;
+  }
+
+  .footer-section h4 {
+    font-size: 0.95rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .footer-section p {
+    font-size: 0.8rem;
+  }
+
+  .footer-section li {
+    margin-bottom: 0.5rem;
+  }
+
+  .footer-section a {
+    font-size: 0.8rem;
+  }
+
+  .newsletter-signup {
+    flex-direction: column;
+  }
+
+  .newsletter-signup input {
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+  }
+
+  .newsletter-signup button {
+    border-radius: 4px;
+    padding: 0.7rem 1rem;
+  }
+
+  .footer-bottom {
+    margin-top: 1.25rem;
+    padding-top: 0.75rem;
+  }
+}
