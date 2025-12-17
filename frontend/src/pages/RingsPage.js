@@ -128,10 +128,6 @@ const RingsPage = () => {
           <i className="fas fa-filter"></i>
           <span>Filter By</span>
         </button>
-        <button className="mobile-filter-btn" onClick={() => setShowSortModal(true)}>
-          <i className="fas fa-sort"></i>
-          <span>Sort</span>
-        </button>
       </div>
 
       {/* Filter Modal for Mobile */}
