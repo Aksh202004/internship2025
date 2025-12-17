@@ -64,7 +64,6 @@ const RingsPage = () => {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const [filters, setFilters] = useState(INITIAL_FILTERS);
   const [showFilterModal, setShowFilterModal] = useState(false);
-  const [showSortModal, setShowSortModal] = useState(false);
 
   const toggleFilter = useCallback((filterType, value) => {
     setFilters(prev => ({
