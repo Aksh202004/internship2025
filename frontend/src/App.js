@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { ClerkProvider } from '@clerk/clerk-react';
+import { ClerkProvider, AuthenticateWithRedirectCallback } from '@clerk/clerk-react';
 import './App.css';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -54,6 +54,7 @@ function App() {
                 {/* Auth Routes - No Header/Footer */}
                 <Route path="/login/*" element={<AuthPage />} />
                 <Route path="/signup/*" element={<AuthPage />} />
+                <Route path="/sso-callback" element={<AuthenticateWithRedirectCallback />} />
                 
                 {/* Admin Login - Hidden route, only admins can proceed after signing in */}
                 <Route path="/admin/login/*" element={

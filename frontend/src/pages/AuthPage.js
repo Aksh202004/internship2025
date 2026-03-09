@@ -261,14 +261,24 @@ const AuthPage = () => {
 
   // Handle OAuth (Google/Facebook)
   const handleOAuth = async (provider) => {
-    if (!signInLoaded) return;
-    
     try {
-      await signIn.authenticateWithRedirect({
-        strategy: `oauth_${provider}`,
-        redirectUrl: '/sso-callback',
-        redirectUrlComplete: '/',
-      });
+      if (isSignUp) {
+        // For signup, use signUp flow
+        if (!signUpLoaded) return;
+        await signUp.authenticateWithRedirect({
+          strategy: `oauth_${provider}`,
+          redirectUrl: '/sso-callback',
+          redirectUrlComplete: '/',
+        });
+      } else {
+        // For login, use signIn flow
+        if (!signInLoaded) return;
+        await signIn.authenticateWithRedirect({
+          strategy: `oauth_${provider}`,
+          redirectUrl: '/sso-callback',
+          redirectUrlComplete: '/',
+        });
+      }
     } catch (err) {
       console.error('OAuth error:', err);
       setErrors({ general: 'Failed to connect with ' + provider });
