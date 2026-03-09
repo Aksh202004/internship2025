@@ -120,24 +120,6 @@ const Products = () => {
     }
   };
 
-  const getStatusBadge = (product) => {
-    let status = product.status || 'draft';
-    if (status === 'active' && product.stock <= 0) {
-      status = 'out_of_stock';
-    } else if (status === 'active' && product.stock <= (product.low_stock_threshold || 5)) {
-      status = 'low_stock';
-    }
-    
-    const statusMap = {
-      active: { label: 'Active', class: 'status-active' },
-      low_stock: { label: 'Low Stock', class: 'status-low' },
-      out_of_stock: { label: 'Out of Stock', class: 'status-out' },
-      draft: { label: 'Draft', class: 'status-draft' },
-    };
-    const statusInfo = statusMap[status] || statusMap.draft;
-    return <span className={`status-badge ${statusInfo.class}`}>{statusInfo.label}</span>;
-  };
-
   if (loading) {
     return (
       <div className="products-loading">

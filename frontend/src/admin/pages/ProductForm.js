@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { productsApi, categoriesApi } from '../services/api';
 import './ProductForm.css';
@@ -52,28 +52,12 @@ const ProductForm = () => {
   const [activeTab, setActiveTab] = useState('basic');
   const [errors, setErrors] = useState({});
 
-  useEffect(() => {
-    fetchCategories();
-    if (isEditing) {
-      fetchProduct();
-    }
-  }, [id]);
-
-  const fetchCategories = async () => {
-    try {
-      const data = await categoriesApi.getAll();
-      setCategories(data || []);
-    } catch (err) {
-      console.error('Error fetching categories:', err);
-    }
-  };
-
-  const fetchProduct = async () => {
+  const fetchProduct = useCallback(async () => {
     try {
       setLoading(true);
       const product = await productsApi.getById(id);
-      setFormData({
-        ...formData,
+      setFormData(prev => ({
+        ...prev,
         name: product.name || '',
         sku: product.sku || '',
         description: product.description || '',
@@ -100,18 +84,28 @@ const ProductForm = () => {
         is_bestseller: product.is_bestseller || false,
         status: product.status || 'draft',
         existingImages: product.images || [],
-        images: (product.image_urls || []).map((url, idx) => ({
-          id: product.images[idx],
-          url,
-          isExisting: true
-        })),
-      });
+      }));
     } catch (err) {
       console.error('Error fetching product:', err);
       alert('Failed to load product');
-      navigate('/admin/products');
     } finally {
       setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    fetchCategories();
+    if (isEditing) {
+      fetchProduct();
+    }
+  }, [isEditing, fetchProduct]);
+
+  const fetchCategories = async () => {
+    try {
+      const data = await categoriesApi.getAll();
+      setCategories(data || []);
+    } catch (err) {
+      console.error('Error fetching categories:', err);
     }
   };
 

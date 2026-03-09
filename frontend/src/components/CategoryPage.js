@@ -11,11 +11,7 @@ const CategoryPage = ({ categoryName, title, breadcrumb }) => {
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState('recommended');
 
-  useEffect(() => {
-    fetchProducts();
-  }, [categoryName]);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getProductsByCategory(categoryName);
@@ -25,7 +21,11 @@ const CategoryPage = ({ categoryName, title, breadcrumb }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [categoryName]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-IN', {

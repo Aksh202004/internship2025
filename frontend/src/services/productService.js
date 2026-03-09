@@ -228,7 +228,7 @@ const transformProduct = (product) => {
   };
 };
 
-export default {
+const productService = {
   getProducts,
   getProductsByCategory,
   getProductById,
@@ -238,3 +238,5 @@ export default {
   getCategories,
   searchProducts
 };
+
+export default productService;
