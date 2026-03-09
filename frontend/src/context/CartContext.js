@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { validateCoupon } from '../services/couponService';
 
 const CartContext = createContext();
 
@@ -16,9 +17,29 @@ export const CartProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : [];
   });
 
+  const [appliedCoupon, setAppliedCoupon] = useState(() => {
+    const saved = sessionStorage.getItem('appliedCoupon');
+    return saved ? JSON.parse(saved) : null;
+  });
+
+  const [couponDiscount, setCouponDiscount] = useState(() => {
+    const saved = sessionStorage.getItem('couponDiscount');
+    return saved ? parseFloat(saved) : 0;
+  });
+
   useEffect(() => {
     sessionStorage.setItem('cart', JSON.stringify(cartItems));
   }, [cartItems]);
+
+  useEffect(() => {
+    if (appliedCoupon) {
+      sessionStorage.setItem('appliedCoupon', JSON.stringify(appliedCoupon));
+      sessionStorage.setItem('couponDiscount', couponDiscount.toString());
+    } else {
+      sessionStorage.removeItem('appliedCoupon');
+      sessionStorage.removeItem('couponDiscount');
+    }
+  }, [appliedCoupon, couponDiscount]);
 
   const addToCart = (product, quantity = 1, options = {}) => {
     setCartItems((prev) => {
@@ -80,7 +101,55 @@ export const CartProvider = ({ children }) => {
     }, 0);
   };
 
+  // Apply coupon code
+  const applyCoupon = async (code) => {
+    const cartTotal = getCartTotal();
+    const result = await validateCoupon(code, cartTotal);
+    
+    if (result.valid) {
+      setAppliedCoupon(result.coupon);
+      setCouponDiscount(result.discount);
+      return { success: true, message: result.message, discount: result.discount };
+    } else {
+      return { success: false, error: result.error };
+    }
+  };
+
+  // Remove applied coupon
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponDiscount(0);
+  };
+
+  // Recalculate discount when cart total changes
+  useEffect(() => {
+    const recalculateDiscount = async () => {
+      if (appliedCoupon) {
+        const cartTotal = getCartTotal();
+        if (cartTotal === 0) {
+          removeCoupon();
+          return;
+        }
+        const result = await validateCoupon(appliedCoupon.code, cartTotal);
+        if (result.valid) {
+          setCouponDiscount(result.discount);
+        } else {
+          // Coupon no longer valid (e.g., cart total below minimum)
+          removeCoupon();
+        }
+      }
+    };
+    recalculateDiscount();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cartItems]);
+
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+
+  // Get final total after discount
+  const getFinalTotal = () => {
+    const subtotal = getCartTotal();
+    return Math.max(0, subtotal - couponDiscount);
+  };
 
   return (
     <CartContext.Provider
@@ -91,7 +160,12 @@ export const CartProvider = ({ children }) => {
         updateQuantity,
         clearCart,
         getCartTotal,
+        getFinalTotal,
         cartCount,
+        appliedCoupon,
+        couponDiscount,
+        applyCoupon,
+        removeCoupon,
       }}
     >
       {children}

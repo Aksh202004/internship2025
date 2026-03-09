@@ -1,6 +1,7 @@
 .category-page {
   padding: 2rem 0;
   margin: 0 auto;
+  animation: pageFadeIn 0.5s ease-in-out;
 }
 
 /* Mobile Filter Buttons */
@@ -426,20 +427,20 @@
 .product-image-container {
   position: relative;
   width: 100%;
-  padding-top: 100%;
+  aspect-ratio: 1;
   overflow: hidden;
-  background: #fff;
+  background: #f9f9f9;
   border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .product-image-container img {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 85%;
-  height: 85%;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
+  padding: 10px;
 }
 
 .wishlist-btn {
@@ -516,6 +517,35 @@
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
+}
+
+.product-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.product-stars {
+  display: flex;
+  gap: 0.1rem;
+}
+
+.product-stars i {
+  font-size: 0.75rem;
+  color: #a67c52;
+}
+
+.rating-value {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.review-count {
+  font-size: 0.8rem;
+  color: #666;
 }
 
 .product-price {

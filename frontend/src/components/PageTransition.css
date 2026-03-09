@@ -1,0 +1,35 @@
+/* Page Transition Animations */
+.page-transition {
+  width: 100%;
+  min-height: 100%;
+}
+
+.page-transition.fade-in {
+  animation: pageEnter 0.35s ease-out forwards;
+}
+
+.page-transition.fade-out {
+  animation: pageExit 0.2s ease-in forwards;
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pageExit {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}

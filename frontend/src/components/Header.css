@@ -204,6 +204,81 @@
   width: 20px;
 }
 
+/* Profile Avatar */
+.profile-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Dropdown User Info */
+.dropdown-user-info {
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+}
+
+.dropdown-user-info .user-name {
+  font-weight: 600;
+  color: #333;
+  font-size: 1rem;
+}
+
+.dropdown-user-info .user-email {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+/* Dropdown Divider */
+.dropdown-divider {
+  height: 1px;
+  background-color: #eaeaea;
+  margin: 0.5rem 0;
+}
+
+/* Dropdown Button (for Sign Out) */
+.dropdown-button {
+  width: 100%;
+  background: none;
+  border: none;
+  color: #333;
+  padding: 1rem 1.5rem;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.dropdown-button:hover {
+  background-color: #f9f9f9;
+}
+
+.dropdown-button i {
+  font-size: 1rem;
+  width: 20px;
+}
+
+/* Admin Link Styling */
+.dropdown-content a.admin-link {
+  color: #7c3aed;
+  font-weight: 500;
+  background: linear-gradient(135deg, #f5f3ff 0%, #fff 100%);
+}
+
+.dropdown-content a.admin-link:hover {
+  background: linear-gradient(135deg, #ede9fe 0%, #f5f3ff 100%);
+}
+
+.dropdown-content a.admin-link i {
+  color: #7c3aed;
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .header {

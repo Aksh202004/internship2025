@@ -1,69 +1,53 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './RingsPage.css';
-import ringImage from '../assets/images/ring.webp';
-import earRingImage from '../assets/images/ear-ring.avif';
 import placeholderImage from '../assets/images/placeholder.png';
 import { useWishlist } from '../context/WishlistContext';
+import { getProductsByCategory } from '../services/productService';
 
 const INITIAL_FILTERS = {
-  category: ['Drops'],
-  material: ['Diamond'],
-  priceRange: [50000, 500000],
+  category: [],
+  material: [],
+  priceRange: [0, 500000],
   occasion: []
 };
 
 const FILTER_OPTIONS = {
-  categories: ['Studs', 'Hoops', 'Drops'],
+  categories: ['Engagement', 'Wedding', 'Fashion'],
   materials: ['Gold', 'Silver', 'Platinum', 'Diamond'],
   occasions: ['Wedding', 'Everyday Wear', 'Gifting']
 };
 
-const SAMPLE_PRODUCTS = [
-  { 
-    id: 1, 
-    name: 'Girlish Star Shaped Gold Stud Earrings', 
-    price: '₹ 30894', 
-    image: earRingImage,
-    bestseller: true,
-    stockMessage: 'Only 1 left!'
-  },
-  { 
-    id: 2, 
-    name: 'Breathtaking Onyx Stone Diamond Stud Earrings', 
-    price: '₹ 47578', 
-    image: placeholderImage 
-  },
-  { 
-    id: 3, 
-    name: 'Swirl Pattern Diamond Stud Earrings In Yellow Gold', 
-    price: '₹ 41674', 
-    image: ringImage 
-  },
-  { 
-    id: 4, 
-    name: 'Elegant Diamond Ring', 
-    price: '₹ 35000', 
-    image: placeholderImage 
-  },
-  { 
-    id: 5, 
-    name: 'Classic Gold Band Ring', 
-    price: '₹ 50000', 
-    image: ringImage 
-  },
-  { 
-    id: 6, 
-    name: 'Modern Minimalist Ring Design', 
-    price: '₹ 45000', 
-    image: placeholderImage 
-  }
-];
-
 const RingsPage = () => {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState(INITIAL_FILTERS);
   const [showFilterModal, setShowFilterModal] = useState(false);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const data = await getProductsByCategory('Rings');
+      setProducts(data || []);
+    } catch (err) {
+      console.error('Error fetching rings:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
 
   const toggleFilter = useCallback((filterType, value) => {
     setFilters(prev => ({
@@ -112,6 +96,23 @@ const RingsPage = () => {
       <span>{label}</span>
     </label>
   );
+
+  const renderStars = (rating) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(<i key={`full-${i}`} className="fas fa-star"></i>);
+    }
+    if (hasHalfStar) {
+      stars.push(<i key="half" className="fas fa-star-half-alt"></i>);
+    }
+    for (let i = stars.length; i < 5; i++) {
+      stars.push(<i key={`empty-${i}`} className="far fa-star"></i>);
+    }
+    return stars;
+  };
 
   return (
     <div className="category-page">
@@ -323,6 +324,7 @@ const RingsPage = () => {
 
         <main className="products-main">
           <div className="products-header">
+            <p className="products-count">{products.length} products found</p>
             <div className="sort-dropdown">
               <label>Sort by:</label>
               <select>
@@ -334,50 +336,62 @@ const RingsPage = () => {
             </div>
           </div>
           
-          <div className="product-grid">
-            {SAMPLE_PRODUCTS.map(product => (
-              <div key={product.id} className="product-card">
-                <Link to={`/product/${product.id}`} className="product-link">
-                  <div className="product-image-container">
-                    <img src={product.image} alt={product.name} />
-                    {product.bestseller && (
-                      <span className="bestseller-badge">
-                        <i className="fas fa-star"></i> BESTSELLERS
-                      </span>
-                    )}
-                    <button 
-                      className={`wishlist-btn ${isInWishlist(product.id) ? 'active' : ''}`}
-                      onClick={(e) => handleWishlistClick(product, e)}
-                      aria-label={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
-                    >
-                      <i className={isInWishlist(product.id) ? 'fas fa-heart' : 'far fa-heart'}></i>
-                    </button>
-                  </div>
-                  <div className="product-info">
-                    <h3 className="product-name">{product.name}</h3>
-                    <p className="product-price">{product.price}</p>
-                    {product.stockMessage && (
-                      <span className="stock-badge">{product.stockMessage}</span>
-                    )}
-                    <button className="view-similar-btn" onClick={(e) => e.preventDefault()}>
-                      <i className="fas fa-cube"></i>
-                      View Similar
-                    </button>
-                  </div>
-                </Link>
-              </div>
-            ))}
-          </div>
+          {loading ? (
+            <div className="loading-container">
+              <div className="loader-spinner"></div>
+              <p>Loading products...</p>
+            </div>
+          ) : products.length === 0 ? (
+            <div className="no-products">
+              <i className="fas fa-gem"></i>
+              <p>No rings found</p>
+            </div>
+          ) : (
+            <div className="product-grid">
+              {products.map(product => (
+                <div key={product.id} className="product-card">
+                  <Link to={`/product/${product.id}`} className="product-link">
+                    <div className="product-image-container">
+                      <img src={product.image || placeholderImage} alt={product.name} />
+                      {product.is_featured && (
+                        <span className="bestseller-badge">
+                          <i className="fas fa-star"></i> FEATURED
+                        </span>
+                      )}
+                      <button 
+                        className={`wishlist-btn ${isInWishlist(product.id) ? 'active' : ''}`}
+                        onClick={(e) => handleWishlistClick(product, e)}
+                        aria-label={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
+                      >
+                        <i className={isInWishlist(product.id) ? 'fas fa-heart' : 'far fa-heart'}></i>
+                      </button>
+                    </div>
+                    <div className="product-info">
+                      <h3 className="product-name">{product.name}</h3>
+                      <div className="product-rating">
+                        <div className="product-stars">{renderStars(product.rating || 0)}</div>
+                        <span className="rating-value">{product.rating || 0}</span>
+                        <span className="review-count">({product.reviewCount || 0} reviews)</span>
+                      </div>
+                      <p className="product-price">{formatPrice(product.price)}</p>
+                      {!product.inStock && (
+                        <span className="stock-badge out-of-stock">Out of Stock</span>
+                      )}
+                      {product.inStock && product.stock_quantity <= 5 && (
+                        <span className="stock-badge">Only {product.stock_quantity} left!</span>
+                      )}
+                    </div>
+                  </Link>
+                </div>
+              ))}
+            </div>
+          )}
 
           <div className="pagination">
             <button className="page-btn prev-btn">
               <i className="fas fa-chevron-left"></i>
             </button>
             <button className="page-btn active">1</button>
-            <button className="page-btn">2</button>
-            <button className="page-btn">3</button>
-            <span className="page-dots">...</span>
-            <button className="page-btn">10</button>
             <button className="page-btn next-btn">
               <i className="fas fa-chevron-right"></i>
             </button>

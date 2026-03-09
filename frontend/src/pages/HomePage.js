@@ -9,6 +9,8 @@ import earRingImage from '../assets/images/ear-ring.avif';
 import pendantImage from '../assets/images/pendant.avif';
 import braceletImage from '../assets/images/bracelet.avif';
 import necklaceImage from '../assets/images/necklace.webp';
+import placeholderImage from '../assets/images/placeholder.png';
+import { getFeaturedProducts, getNewArrivals } from '../services/productService';
 
 const CAROUSEL_SLIDES = [
   {
@@ -85,6 +87,9 @@ const AUTOPLAY_INTERVAL = 5000;
 
 const HomePage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [newArrivals, setNewArrivals] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % CAROUSEL_SLIDES.length);
@@ -96,6 +101,50 @@ const HomePage = () => {
 
   const goToSlide = useCallback((index) => {
     setCurrentSlide(index);
+  }, []);
+
+  // Format price helper
+  const formatPrice = (price) => {
+    if (typeof price === 'string' && price.startsWith('$')) return price;
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(price || 0);
+  };
+
+  // Fetch products from Supabase
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const [featured, arrivals] = await Promise.all([
+          getFeaturedProducts(8),
+          getNewArrivals(8)
+        ]);
+        
+        setFeaturedProducts(featured.map(p => ({
+          id: p.id,
+          name: p.name,
+          price: formatPrice(p.price),
+          image: p.image_url || placeholderImage,
+          rating: p.rating || 4.5
+        })));
+        
+        setNewArrivals(arrivals.map(p => ({
+          id: p.id,
+          name: p.name,
+          price: formatPrice(p.price),
+          image: p.image_url || placeholderImage,
+          rating: p.rating || 4.5
+        })));
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchProducts();
   }, []);
 
   useEffect(() => {
@@ -199,8 +248,49 @@ const HomePage = () => {
 
       <section className="new-arrivals">
         <h2>New Arrivals</h2>
-        <div className="product-grid"></div>
+        {loading ? (
+          <div className="loading-products" style={{ textAlign: 'center', padding: '40px' }}>
+            <p>Loading products...</p>
+          </div>
+        ) : newArrivals.length > 0 ? (
+          <div className="product-grid">
+            {newArrivals.map((product) => (
+              <Link to={`/product/${product.id}`} key={product.id} className="product-card">
+                <div className="product-image-container">
+                  <img src={product.image} alt={product.name} />
+                </div>
+                <div className="product-info">
+                  <h3>{product.name}</h3>
+                  <p className="product-price">{product.price}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="no-products" style={{ textAlign: 'center', padding: '40px' }}>
+            <p>No new arrivals yet. Check back soon!</p>
+          </div>
+        )}
       </section>
+
+      {featuredProducts.length > 0 && (
+        <section className="featured-products">
+          <h2>Featured Products</h2>
+          <div className="product-grid">
+            {featuredProducts.map((product) => (
+              <Link to={`/product/${product.id}`} key={product.id} className="product-card">
+                <div className="product-image-container">
+                  <img src={product.image} alt={product.name} />
+                </div>
+                <div className="product-info">
+                  <h3>{product.name}</h3>
+                  <p className="product-price">{product.price}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 };

@@ -1,66 +1,29 @@
-import React, { useState, useCallback, useMemo } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useState, useCallback, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import './ProductDetailPage.css';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
 import Lens from '../components/Lens';
-import ringImage from '../assets/images/ring.webp';
-import earRingImage from '../assets/images/ear-ring.avif';
+import { getProductById, getProductsByCategory } from '../services/productService';
 import placeholderImage from '../assets/images/placeholder.png';
-import pendantImage from '../assets/images/pendant.avif';
 
-const PRODUCTS_DATABASE = {
-  1: { name: 'Girlish Star Shaped Gold Stud Earrings', price: '$1,250.00', image: earRingImage },
-  2: { name: 'Breathtaking Onyx Stone Diamond Stud Earrings', price: '$1,899.00', image: placeholderImage },
-  3: { name: 'Swirl Pattern Diamond Stud Earrings In Yellow Gold', price: '$1,699.00', image: ringImage },
-  4: { name: 'Elegant Diamond Ring', price: '$1,499.00', image: placeholderImage },
-  5: { name: 'Classic Gold Band Ring', price: '$2,100.00', image: ringImage },
-  6: { name: 'Modern Minimalist Ring Design', price: '$1,850.00', image: placeholderImage },
-  101: { name: 'Classic Diamond Studs', price: '$899.00', image: earRingImage },
-  102: { name: 'Eternity Tennis Bracelet', price: '$1,299.00', image: placeholderImage },
-  103: { name: 'Solitaire Pendant Necklace', price: '$1,699.00', image: pendantImage },
-  104: { name: 'Rose Gold Trio Wedding Band', price: '$1,400.00', image: ringImage },
-};
-
-const DEFAULT_PRODUCT = {
-  name: 'Enchanting Diamond Solitaire Ring',
-  price: '$2,499.00',
-  image: ringImage
-};
-
-const SAMPLE_REVIEWS = [
-  {
-    id: 1,
-    rating: 5,
-    title: 'Absolutely stunning!',
-    text: 'Absolutely stunning! I love this piece. The diamond sparkle is more than I could have imagined. The customer service was also very quick. Highly recommend!',
-    author: 'Sarah T.',
-    date: 'October 28, 2023'
-  },
-  {
-    id: 2,
-    rating: 4,
-    title: 'Beautiful, but sizing was off',
-    text: 'The ring is gorgeous and well made, however, I wish the fit would be a bit as pictured. The process was easy though and an nice experience.',
-    author: 'Mark D.',
-    date: 'September 15, 2023'
-  }
-];
-
-const RELATED_PRODUCTS = [
-  { id: 101, name: 'Classic Diamond Studs', price: '$899.00', image: earRingImage },
-  { id: 102, name: 'Eternity Tennis Bracelet', price: '$1,299.00', image: placeholderImage },
-  { id: 103, name: 'Solitaire Pendant Necklace', price: '$1,699.00', image: pendantImage },
-  { id: 104, name: 'Rose Gold Trio Wedding Band', price: '$1,400.00', image: ringImage },
-];
-
-const METAL_TYPES = ['Yellow Gold', '18 KAPH GOLD', 'Platinum'];
-const AVAILABLE_SIZES = ['5', '6', '7', '8', '9'];
+const METAL_TYPES = ['Yellow Gold', '18K Gold', 'Platinum', 'White Gold', 'Rose Gold'];
+const AVAILABLE_SIZES = ['5', '6', '7', '8', '9', '10'];
 
 const ProductDetailPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { addToWishlist, isInWishlist, removeFromWishlist } = useWishlist();
   const { addToCart } = useCart();
+  
+  // Product state
+  const [product, setProduct] = useState(null);
+  const [relatedProducts, setRelatedProducts] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // UI state
   const [selectedMetalType, setSelectedMetalType] = useState(METAL_TYPES[0]);
   const [selectedSize, setSelectedSize] = useState(AVAILABLE_SIZES[1]);
   const [addedToCart, setAddedToCart] = useState(false);
@@ -70,24 +33,120 @@ const ProductDetailPage = () => {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
 
-  const productData = useMemo(() => 
-    PRODUCTS_DATABASE[parseInt(id)] || DEFAULT_PRODUCT,
-    [id]
-  );
+  // Format price helper
+  const formatPrice = (price) => {
+    if (typeof price === 'string' && price.startsWith('$')) return price;
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(price || 0);
+  };
 
-  const product = useMemo(() => ({
-    id: parseInt(id),
-    name: productData.name,
-    price: productData.price,
-    rating: 4.7,
-    reviews: 126,
-    image: productData.image,
-    description: 'A timeless piece designed to capture the essence of everlasting love. This exquisite ring features a brilliant-cut diamond, held in a classic four-prong setting that elevates the stone to catch light from every angle, ensuring maximum sparkle.',
-    metalTypes: METAL_TYPES,
-    sizes: AVAILABLE_SIZES,
-  }), [id, productData]);
+  // Fetch product data
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        console.log('ProductDetailPage: Fetching product with ID:', id);
+        const productData = await getProductById(id);
+        console.log('ProductDetailPage: Received data:', productData);
+        
+        if (!productData) {
+          setError('Product not found');
+          setLoading(false);
+          return;
+        }
+        
+        // Transform product data
+        const transformedProduct = {
+          id: productData.id,
+          name: productData.name,
+          price: formatPrice(productData.price),
+          originalPrice: productData.original_price ? formatPrice(productData.original_price) : null,
+          rating: productData.rating || 4.5,
+          reviewCount: productData.review_count || 0,
+          image: productData.image_url || productData.image || placeholderImage,
+          description: productData.description || 'A beautiful piece of jewelry crafted with precision and care.',
+          metalTypes: METAL_TYPES,
+          sizes: AVAILABLE_SIZES,
+          category: productData.category?.name || productData.category_name || 'Jewelry',
+          categorySlug: productData.category?.slug || 'jewelry',
+          sku: productData.sku || `SKU-${productData.id}`,
+          stock: productData.stock || 0,
+          featured: productData.is_featured,
+        };
+        
+        console.log('ProductDetailPage: Transformed product:', transformedProduct);
+        setProduct(transformedProduct);
+        
+        // Fetch related products from same category
+        if (productData.category?.name) {
+          const related = await getProductsByCategory(productData.category.name);
+          const filteredRelated = related
+            .filter(p => p.id !== productData.id)
+            .slice(0, 4)
+            .map(p => ({
+              id: p.id,
+              name: p.name,
+              price: formatPrice(p.price),
+              image: p.image_url || placeholderImage
+            }));
+          setRelatedProducts(filteredRelated);
+        }
+        
+        // Set reviews if available from product data
+        if (productData.reviews && productData.reviews.length > 0) {
+          setReviews(productData.reviews.map(r => ({
+            id: r.id,
+            rating: r.rating,
+            title: r.title || 'Great product!',
+            text: r.comment || r.review_text || '',
+            author: r.customer_name || 'Anonymous',
+            date: new Date(r.created_at).toLocaleDateString('en-US', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })
+          })));
+        } else {
+          // Sample reviews as fallback
+          setReviews([
+            {
+              id: 1,
+              rating: 5,
+              title: 'Absolutely stunning!',
+              text: 'Absolutely stunning! I love this piece. The sparkle is more than I could have imagined. Highly recommend!',
+              author: 'Sarah T.',
+              date: 'October 28, 2023'
+            },
+            {
+              id: 2,
+              rating: 4,
+              title: 'Beautiful quality',
+              text: 'The piece is gorgeous and well made. The process was easy and a nice experience.',
+              author: 'Mark D.',
+              date: 'September 15, 2023'
+            }
+          ]);
+        }
+        
+      } catch (err) {
+        console.error('Error fetching product:', err);
+        setError('Failed to load product');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    if (id) {
+      fetchProduct();
+    }
+  }, [id]);
 
   const handleWishlistToggle = useCallback(() => {
+    if (!product) return;
     if (isInWishlist(product.id)) {
       removeFromWishlist(product.id);
     } else {
@@ -96,10 +155,11 @@ const ProductDetailPage = () => {
   }, [isInWishlist, product, removeFromWishlist, addToWishlist]);
 
   const handleAddToCart = useCallback(() => {
+    if (!product) return;
     addToCart(product, 1, {
       metalType: selectedMetalType,
       size: selectedSize,
-      sku: `R45-21-GD-${selectedSize}`,
+      sku: product.sku,
     });
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
@@ -182,10 +242,57 @@ const ProductDetailPage = () => {
     return stars;
   }, []);
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="product-detail-page">
+        <div className="loading-container" style={{ textAlign: 'center', padding: '100px 20px' }}>
+          <div className="loading-spinner" style={{ 
+            width: '50px', 
+            height: '50px', 
+            border: '3px solid #f3f3f3',
+            borderTop: '3px solid #8B7355',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 20px'
+          }}></div>
+          <p>Loading product...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error || !product) {
+    return (
+      <div className="product-detail-page">
+        <div className="error-container" style={{ textAlign: 'center', padding: '100px 20px' }}>
+          <i className="fas fa-exclamation-circle" style={{ fontSize: '48px', color: '#dc3545', marginBottom: '20px' }}></i>
+          <h2>{error || 'Product not found'}</h2>
+          <p>The product you're looking for doesn't exist or has been removed.</p>
+          <button 
+            onClick={() => navigate('/')} 
+            style={{ 
+              marginTop: '20px', 
+              padding: '12px 24px', 
+              background: '#8B7355', 
+              color: 'white', 
+              border: 'none', 
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Back to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="product-detail-page">
       <div className="breadcrumb">
-        <Link to="/">Home</Link> &gt; <Link to="/rings">Rings</Link> &gt; <span>Engagement Rings</span>
+        <Link to="/">Home</Link> &gt; <Link to={`/${product.categorySlug || 'jewelry'}`}>{product.category}</Link> &gt; <span>{product.name}</span>
       </div>
 
       <div className="product-detail-container">
@@ -266,7 +373,7 @@ const ProductDetailPage = () => {
             <span className="price">{product.price}</span>
             <div className="rating-section">
               <div className="stars">{renderStars(product.rating)}</div>
-              <span className="reviews-count">({product.reviews} Reviews)</span>
+              <span className="reviews-count">({product.reviewCount} Reviews)</span>
             </div>
           </div>
 
@@ -341,38 +448,63 @@ const ProductDetailPage = () => {
         <h2>Customer Reviews</h2>
         <div className="reviews-summary">
           <div className="overall-rating">
-            <div className="rating-number">{product.rating}</div>
             <div className="stars">{renderStars(product.rating)}</div>
-            <div className="based-on">Based on {product.reviews} reviews</div>
+            <div className="rating-text">{product.rating} out of 5</div>
+            <div className="based-on">Based on {product.reviewCount || reviews.length} reviews</div>
           </div>
-          <div className="reviews-list">
-            {SAMPLE_REVIEWS.map((review) => (
-              <div key={review.id} className="review-item">
-                <div className="review-stars">{renderStars(review.rating)}</div>
-                <h4 className="review-title">{review.title}</h4>
-                <p className="review-text">{review.text}</p>
-                <div className="review-meta">
-                  <span className="review-author">{review.author}</span>
-                  <span className="review-date">{review.date}</span>
+          <div className="rating-breakdown">
+            {[5, 4, 3, 2, 1].map((star) => {
+              const reviewTotal = product.reviewCount || reviews.length || 1;
+              const counts = { 5: Math.floor(reviewTotal * 0.65), 4: Math.floor(reviewTotal * 0.20), 3: Math.floor(reviewTotal * 0.10), 2: Math.floor(reviewTotal * 0.03), 1: Math.floor(reviewTotal * 0.02) };
+              const percent = (counts[star] / reviewTotal) * 100;
+              return (
+                <div key={star} className="rating-row">
+                  <div className="row-stars">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <i key={s} className={`${s <= star ? 'fas' : 'far'} fa-star ${s > star ? 'empty' : ''}`}></i>
+                    ))}
+                  </div>
+                  <div className="rating-bar">
+                    <div className="rating-bar-fill" style={{ width: `${percent}%` }}></div>
+                  </div>
+                  <span className="rating-count">{counts[star]}</span>
                 </div>
-              </div>
-            ))}
+              );
+            })}
+          </div>
+          <div className="write-review-section">
+            <button className="write-review-btn">Write a review</button>
           </div>
         </div>
-      </div>
-
-      <div className="related-products-section">
-        <h2>You May Also Like</h2>
-        <div className="related-products-grid">
-          {RELATED_PRODUCTS.map((relatedProduct) => (
-            <Link to={`/product/${relatedProduct.id}`} key={relatedProduct.id} className="related-product-card">
-              <img src={relatedProduct.image} alt={relatedProduct.name} />
-              <h3>{relatedProduct.name}</h3>
-              <p className="related-price">{relatedProduct.price}</p>
-            </Link>
+        <div className="reviews-list">
+          {reviews.map((review) => (
+            <div key={review.id} className="review-item">
+              <div className="review-stars">{renderStars(review.rating)}</div>
+              <h4 className="review-title">{review.title}</h4>
+              <p className="review-text">{review.text}</p>
+              <div className="review-meta">
+                <span className="review-author">{review.author}</span>
+                <span className="review-date">{review.date}</span>
+              </div>
+            </div>
           ))}
         </div>
       </div>
+
+      {relatedProducts.length > 0 && (
+        <div className="related-products-section">
+          <h2>You May Also Like</h2>
+          <div className="related-products-grid">
+            {relatedProducts.map((relatedProduct) => (
+              <Link to={`/product/${relatedProduct.id}`} key={relatedProduct.id} className="related-product-card">
+                <img src={relatedProduct.image} alt={relatedProduct.name} />
+                <h3>{relatedProduct.name}</h3>
+                <p className="related-price">{relatedProduct.price}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,11 +1,13 @@
 import React from 'react';
+import CategoryPage from '../components/CategoryPage';
 
 const BraceletsPage = () => {
   return (
-    <div>
-      <h1>Bracelets</h1>
-      <p>This is the bracelets category page. Products will be listed here.</p>
-    </div>
+    <CategoryPage 
+      categoryName="Bracelets" 
+      title="Bracelets Collection"
+      breadcrumb="Home / Bracelets"
+    />
   );
 };
 

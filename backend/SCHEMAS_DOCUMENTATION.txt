@@ -1,0 +1,424 @@
+================================================================================
+                    JEWELRY E-COMMERCE - DATABASE SCHEMAS
+                         MongoDB + Mongoose Documentation
+================================================================================
+
+Last Updated: December 28, 2025
+Version: 1.0
+
+This document contains all database schemas for the jewelry e-commerce platform.
+All schemas use Mongoose ODM with MongoDB.
+
+================================================================================
+                              TABLE OF CONTENTS
+================================================================================
+1. Sub-Schemas (Embedded/Reusable)
+   - AddressSchema
+   - ImageSchema
+   - VariantSchema
+   - CustomizationSchema
+   - PaymentSchema
+
+2. Main Schemas (Collections)
+   - UserSchema
+   - ProductSchema
+   - CategorySchema
+   - ReviewSchema
+   - CartSchema
+   - OrderSchema
+   - CouponSchema
+   - WishlistSchema
+
+================================================================================
+                         1. SUB-SCHEMAS (EMBEDDED)
+================================================================================
+Note: Sub-schemas have { _id: false } - they don't get their own MongoDB _id
+      They are embedded inside main schemas, not stored as separate collections
+
+--------------------------------------------------------------------------------
+ADDRESS SCHEMA
+--------------------------------------------------------------------------------
+Purpose: Stores shipping/billing addresses for users and orders
+
+Fields:
+  - label         : String    → User-defined label like "Home", "Office"
+  - firstName     : String
+  - lastName      : String
+  - street        : String    → Full street address
+  - city          : String
+  - state         : String
+  - country       : String
+  - postalCode    : String    → PIN code / ZIP code
+  - phone         : String
+  - isDefault     : Boolean   → If true, this is user's primary address
+
+--------------------------------------------------------------------------------
+IMAGE SCHEMA
+--------------------------------------------------------------------------------
+Purpose: Stores image URLs with alt text for products/reviews
+
+Fields:
+  - url           : String (required)  → CDN or storage URL
+  - alt           : String             → Alt text for accessibility/SEO
+
+--------------------------------------------------------------------------------
+VARIANT SCHEMA
+--------------------------------------------------------------------------------
+Purpose: Product variations like different metals, sizes with different prices
+
+Example: A ring available in Gold (₹50,000) and Platinum (₹75,000)
+
+Fields:
+  - sku           : String    → Unique identifier for this variant
+  - options       : Map       → Key-value pairs like { "Metal": "Gold", "Size": "7" }
+                               ⚠️ Map type stores dynamic key-value pairs
+  - price         : Number (required) → Price for this specific variant
+  - compareAtPrice: Number    → Original price (for showing discounts)
+  - stock         : Number    → Available quantity for this variant
+  - reservedStock : Number    → Quantity held during checkout (prevents overselling)
+                               ⚠️ When user adds to cart, increment reservedStock
+                               ⚠️ On order complete/timeout, adjust stock & reservedStock
+  - images        : [Image]   → Variant-specific images
+
+--------------------------------------------------------------------------------
+CUSTOMIZATION SCHEMA
+--------------------------------------------------------------------------------
+Purpose: Customer-requested customizations for jewelry items
+
+Fields:
+  - ringSize      : String    → Ring size (e.g., "6", "7", "8")
+  - engraving     : String    → Custom text engraving (max 50 chars)
+  - chainLength   : String    → For necklaces (e.g., "16 inch", "18 inch")
+  - giftWrap      : Boolean   → Add gift wrapping
+  - giftMessage   : String    → Message to include (max 200 chars)
+
+--------------------------------------------------------------------------------
+PAYMENT SCHEMA
+--------------------------------------------------------------------------------
+Purpose: Payment gateway transaction details
+
+Fields:
+  - provider      : String    → Gateway name: "Razorpay", "Stripe", "PayU"
+  - paymentIntentId: String   → Transaction ID from payment gateway
+                               ⚠️ Store this for refunds and reconciliation
+  - amount        : Number    → Amount charged
+  - currency      : String    → Currency code (INR, USD)
+  - status        : String    → "pending", "success", "failed", "refunded"
+
+
+================================================================================
+                         2. MAIN SCHEMAS (COLLECTIONS)
+================================================================================
+Note: These are stored as separate MongoDB collections
+      { timestamps: true } automatically adds createdAt and updatedAt fields
+
+--------------------------------------------------------------------------------
+USER SCHEMA
+--------------------------------------------------------------------------------
+Collection: users
+
+Fields:
+  - firstName     : String
+  - lastName      : String
+  - email         : String (required, unique, indexed)
+                   ⚠️ Always validate email format before saving
+  - passwordHash  : String    → NEVER store plain passwords! Use bcrypt
+                               ⚠️ Can be null for social login users
+  - phone         : String
+  - role          : String    → "user" or "admin" only
+                               ⚠️ Protect admin role assignment in API
+  - isVerified    : Boolean   → Email verified status
+  - addresses     : [Address] → Array of saved addresses
+  - wishlist      : [ObjectId]→ References to Product documents
+  - purchasedProducts: [ObjectId] → Products user has bought
+                               ⚠️ Use this to verify "Verified Purchase" reviews
+  - metadata      : Map       → Flexible storage for extra data
+
+--------------------------------------------------------------------------------
+PRODUCT SCHEMA
+--------------------------------------------------------------------------------
+Collection: products
+
+Basic Fields:
+  - title         : String (required, indexed) → Product name
+  - slug          : String (indexed)  → URL-friendly name (e.g., "gold-ring-22k")
+  - description   : String
+  - sku           : String (indexed)  → Stock Keeping Unit - unique product code
+  - price         : Number (required) → Base price in smallest currency unit
+  - currency      : String            → Default "INR"
+
+Discount Fields:
+  - discountType  : String    → "none", "percent", or "fixed"
+  - discountValue : Number    → Discount amount (percentage or fixed value)
+                               Example: discountType="percent", discountValue=20 → 20% off
+
+Media:
+  - images        : [Image]   → Product images
+  - thumbnails    : [String]  → Small preview image URLs
+
+Categorization:
+  - categories    : [ObjectId]→ References to Category documents
+  - tags          : [String]  → Searchable tags like ["trending", "bestseller"]
+
+⭐ JEWELRY-SPECIFIC FIELDS:
+
+  metalDetails:               → Metal information
+    - type        : String    → "Gold", "Silver", "Platinum", "Rose Gold"
+    - purity      : String    → "18k", "22k", "24k", "925" (for silver)
+
+  gemstoneDetails: [Array]    → Can have multiple gemstones
+    - type        : String    → "Diamond", "Ruby", "Emerald", "Sapphire"
+    - count       : Number    → Number of stones
+    - clarity     : String    → Diamond clarity: "VVS1", "VS1", "SI1"
+    - color       : String    → Diamond color: "D", "E", "F" or gem color
+    - cut         : String    → "Excellent", "Very Good", "Good"
+    - shape       : String    → "Round", "Princess", "Oval", "Cushion"
+
+  certification:              → Product certification
+    - authority   : String    → "BIS" (Bureau of Indian Standards), "IGI", "GIA"
+    - certificateId: String   → Certificate number
+    - url         : String    → Link to certificate
+
+  gender          : String    → "Men", "Women", "Unisex", "Kids"
+  occasion        : [String]  → ["Wedding", "Daily Wear", "Gift", "Engagement"]
+
+Inventory:
+  - variants      : [Variant] → Product variations (see VariantSchema above)
+  - stock         : Number    → Total available (for non-variant products)
+  - reservedStock : Number    → Held during checkout
+                               ⚠️ Available = stock - reservedStock
+
+Shipping:
+  dimensions:                 → For calculating shipping costs
+    - length      : Number    → In centimeters
+    - width       : Number
+    - height      : Number
+    - weight      : Number    → In grams
+
+Ratings:
+  - ratingAverage : Number    → Calculated average (update when review added/removed)
+  - ratingCount   : Number    → Total number of reviews
+
+Flags:
+  - bestseller    : Boolean   → Show "Bestseller" badge
+  - featured      : Boolean   → Show on homepage
+  - active        : Boolean   → If false, product is hidden from store
+
+Extra:
+  - materials     : [String]  → Generic materials list
+  - metafields    : Map       → Flexible key-value storage for custom data
+
+--------------------------------------------------------------------------------
+CATEGORY SCHEMA
+--------------------------------------------------------------------------------
+Collection: categories
+
+Fields:
+  - name          : String (required) → Category name
+  - slug          : String (indexed)  → URL-friendly name
+  - parent        : ObjectId → Reference to parent Category (for subcategories)
+                              ⚠️ If null, it's a top-level category
+                              Example: "Rings" → parent: null
+                                       "Engagement Rings" → parent: ObjectId(Rings)
+  - description   : String
+
+--------------------------------------------------------------------------------
+REVIEW SCHEMA
+--------------------------------------------------------------------------------
+Collection: reviews
+
+Fields:
+  - user          : ObjectId (required) → Who wrote the review
+  - product       : ObjectId (required) → Which product
+  - rating        : Number (required)   → 1 to 5 stars
+  - title         : String              → Review headline
+  - body          : String              → Full review text
+  - images        : [Image]             → Customer photos
+  - helpfulCount  : Number              → "Was this helpful?" votes
+
+⭐ ENHANCED REVIEW FIELDS:
+  - isVerifiedPurchase: Boolean → True if user actually bought this product
+                                 ⚠️ Check user.purchasedProducts before setting
+  - hasImages     : Boolean     → Quick flag for filtering reviews with photos
+  - detailScore   : Number      → Calculated score based on review quality
+                                 ⚠️ Use for sorting "Most Helpful" reviews
+                                 Formula: text_length + (images * 10) + helpfulCount
+  - qualityRating : Number      → Sub-rating: Product quality (1-5)
+  - valueRating   : Number      → Sub-rating: Value for money (1-5)
+
+--------------------------------------------------------------------------------
+CART SCHEMA
+--------------------------------------------------------------------------------
+Collection: carts
+
+Fields:
+  - user          : ObjectId  → Cart owner (can be null for guest carts)
+  - items         : [CartItem]→ Array of items in cart
+
+CartItem sub-document:
+  - product       : ObjectId (required)
+  - variantOptions: Map       → Selected variant options { "Metal": "Gold" }
+  - quantity      : Number
+  - price         : Number (required) → Price at time of adding to cart
+                               ⚠️ Store price here because product price may change
+
+--------------------------------------------------------------------------------
+ORDER SCHEMA
+--------------------------------------------------------------------------------
+Collection: orders
+
+Identification:
+  - user          : ObjectId  → Customer who placed the order
+  - orderNumber   : String (unique, indexed)
+                              ⚠️ Generate human-readable order number
+                              Example: "ORD-2025-001234"
+
+Items:
+  - items         : [OrderItem] → Products ordered (see below)
+
+OrderItem sub-document:
+  - product       : ObjectId (required)
+  - title         : String    → ⚠️ Copy product title (product may change later)
+  - variantOptions: Map       → Selected options { "Metal": "Gold", "Size": "7" }
+  - customizations: Customization → Ring size, engraving, etc.
+  - quantity      : Number (required)
+  - price         : Number (required) → Price at time of order
+  - status        : String    → Per-item status for partial returns
+                              Values: "pending", "processing", "shipped", 
+                                      "delivered", "returned", "refunded", "cancelled"
+  - returnReason  : String    → Why customer returned this item
+
+Addresses:
+  - shippingAddress: Address  → Where to deliver
+  - billingAddress : Address  → For invoice
+
+Pricing:
+  - subtotal      : Number    → Sum of item prices
+  - shipping      : Number    → Shipping charges
+  - tax           : Number    → Tax amount
+  - total         : Number (required) → Final amount charged
+
+Order Status:
+  - status        : String    → Overall order status
+                              Values: "pending" → "paid" → "processing" → 
+                                      "shipped" → "delivered"
+                              Or: "cancelled", "refunded"
+  - payment       : Payment   → Payment details (see PaymentSchema)
+  - coupons       : [ObjectId]→ Applied coupon codes
+
+⭐ TRACKING FIELDS:
+  - trackingNumber: String    → Courier tracking number
+  - carrier       : String    → "Delhivery", "BlueDart", "FedEx", etc.
+  - shippedAt     : Date      → When order was shipped
+  - deliveredAt   : Date      → When order was delivered
+  - estimatedDelivery: Date   → Expected delivery date
+  - notes         : String    → Internal notes (not shown to customer)
+
+--------------------------------------------------------------------------------
+COUPON SCHEMA
+--------------------------------------------------------------------------------
+Collection: coupons
+
+Fields:
+  - code          : String (required, unique, indexed)
+                              ⚠️ Store uppercase: "SUMMER20"
+  - description   : String    → Internal description
+  - discountType  : String (required) → "fixed" or "percent"
+  - discountValue : Number (required) → Amount or percentage
+  - maxDiscountAmount: Number → Cap for percentage discounts
+                               Example: 20% off, max ₹500
+  - minPurchaseAmount: Number → Minimum cart value to apply coupon
+
+Usage Limits:
+  - usageLimit    : Number    → Total times coupon can be used
+  - usageCount    : Number    → Times already used
+                              ⚠️ Increment atomically to prevent race conditions
+  - perUserLimit  : Number    → Max uses per customer
+
+Validity:
+  - validFrom     : Date      → Coupon activation date
+  - validUntil    : Date      → Coupon expiry date
+  - active        : Boolean   → Quick enable/disable switch
+
+Restrictions:
+  - applicableCategories: [ObjectId] → Only applies to these categories
+  - applicableProducts  : [ObjectId] → Only applies to these products
+                              ⚠️ If both empty, coupon applies to entire cart
+
+--------------------------------------------------------------------------------
+WISHLIST SCHEMA
+--------------------------------------------------------------------------------
+Collection: wishlists
+
+Fields:
+  - user          : ObjectId (required) → Wishlist owner
+  - products      : [ObjectId]→ Saved products
+
+
+================================================================================
+                              IMPORTANT NOTES
+================================================================================
+
+1. INDEXES
+   Fields with "indexed" create database indexes for faster queries.
+   The "unique" constraint prevents duplicate values.
+
+2. ObjectId REFERENCES
+   ObjectId fields with "ref" are references to other collections.
+   Use .populate() in Mongoose to fetch the full document.
+
+3. TIMESTAMPS
+   All main schemas have { timestamps: true } which automatically adds:
+   - createdAt: Date when document was created
+   - updatedAt: Date when document was last modified
+
+4. MAP TYPE
+   Map fields store key-value pairs where keys are unknown at design time.
+   Example: variantOptions can store { "Color": "Red", "Size": "M" }
+
+5. REQUIRED FIELDS
+   Fields marked "required" must have a value or MongoDB will reject the document.
+
+6. ENUM VALUES
+   Some String fields have enum: [...] which restricts allowed values.
+   MongoDB will reject values not in the enum list.
+
+
+================================================================================
+                              USAGE EXAMPLES
+================================================================================
+
+// Creating a product with jewelry details
+const product = new Product({
+  title: "Elegant Diamond Solitaire Ring",
+  price: 85000,
+  metalDetails: { type: "Gold", purity: "18k" },
+  gemstoneDetails: [{ type: "Diamond", count: 1, clarity: "VVS1", cut: "Excellent" }],
+  gender: "Women",
+  occasion: ["Engagement", "Gift"]
+});
+
+// Creating an order with customization
+const order = new Order({
+  user: userId,
+  orderNumber: "ORD-2025-001234",
+  items: [{
+    product: productId,
+    title: "Diamond Ring",
+    customizations: { ringSize: "7", engraving: "Forever" },
+    quantity: 1,
+    price: 85000
+  }],
+  total: 85000
+});
+
+// Checking stock availability
+const available = product.stock - product.reservedStock;
+if (available >= requestedQuantity) {
+  // Reserve stock
+  product.reservedStock += requestedQuantity;
+}
+
+================================================================================
+                                    END
+================================================================================

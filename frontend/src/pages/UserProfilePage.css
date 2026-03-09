@@ -2,6 +2,7 @@
   padding: 2rem;
   background-color: #f8f8f8;
   min-height: 100vh;
+  animation: pageFadeIn 0.5s ease-in-out;
 }
 
 .profile-container {

@@ -1,0 +1,96 @@
+.admin-signin-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  padding: 2rem;
+}
+
+.admin-signin-container {
+  width: 100%;
+  max-width: 450px;
+}
+
+.admin-signin-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: white;
+}
+
+.admin-signin-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: #fff;
+}
+
+.admin-signin-header p {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+.clerk-signin-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+/* Clerk component styling overrides */
+.clerk-root-box {
+  width: 100%;
+}
+
+.clerk-card {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+  border-radius: 12px !important;
+}
+
+.clerk-header-title {
+  display: none !important;
+}
+
+.clerk-header-subtitle {
+  display: none !important;
+}
+
+.clerk-button-primary {
+  background: #832729 !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+}
+
+.clerk-button-primary:hover {
+  background: #6a1f21 !important;
+  transform: translateY(-1px);
+}
+
+.clerk-input {
+  border-radius: 8px !important;
+  border: 1px solid #ddd !important;
+}
+
+.clerk-input:focus {
+  border-color: #832729 !important;
+  box-shadow: 0 0 0 3px rgba(131, 39, 41, 0.1) !important;
+}
+
+.clerk-footer-hidden {
+  display: none !important;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .admin-signin-page {
+    padding: 1rem;
+  }
+
+  .admin-signin-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .admin-signin-header p {
+    font-size: 0.9rem;
+  }
+}
